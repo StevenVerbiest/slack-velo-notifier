@@ -1,0 +1,26 @@
+{
+  "name": "slack-velo-notifier",
+  "version": "1.0.0",
+  "description": "Slack Velo App",
+  "main": "./server.js",
+  "dependencies": {
+    "botkit": "^0.6.16",
+    "dotenv": "^6.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.4"
+  },
+  "scripts": {
+    "start": "nodemon server.js 4390"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/StevenVerbiest/slack-velo-notifier.git"
+  },
+  "author": "Steven Verbiest",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/StevenVerbiest/slack-velo-notifier/issues"
+  },
+  "homepage": "https://github.com/StevenVerbiest/slack-velo-notifier#readme"
+}
