@@ -52,6 +52,7 @@ app.listen(PORT, function () {
 });
 
 app.get('/', function(req, res) {
+  res.send('Index');
 });
 
 app.post('/report', function(req, res) {
