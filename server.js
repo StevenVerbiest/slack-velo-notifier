@@ -1,7 +1,7 @@
 require('dotenv').config({silent: true});
 
 if (!process.env.BOT_TOKEN) {
-    process.exit(1);
+  process.exit(1);
 }
 
 const express = require('express');
@@ -17,15 +17,18 @@ const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const USER_ID = process.env.USER_ID;
 const VELO_ADDRESS = process.env.VELO_ADDRESS;
 const CRON_TIME = process.env.CRON_TIME;
+const ALERT_THRESHOLD = Number(process.env.ALERT_THRESHOLD);
 
-const controller = Botkit.slackbot({ debug: true});
+const controller = Botkit.slackbot({ debug: true });
 const CronJob = cron.CronJob;
+
+let lastBikeCount;
 
 const bot = controller.spawn({
   token: process.env.BOT_TOKEN
 }).startRTM();
 
-const job = new CronJob({
+const jobInit = new CronJob({
   cronTime: CRON_TIME,
   onTick: function() {
     fetch('https://www.velo-antwerpen.be/availability_map/getJsonObject')
@@ -36,12 +39,27 @@ const job = new CronJob({
         const station = json.filter(obj => {
           return obj.address === VELO_ADDRESS
         });
-        const bikes = station[0].bikes;
+
+        const bikeCount = station[0].bikes;
+
+        if (bikeCount === lastBikeCount) { return; }
+
+        if (bikeCount > ALERT_THRESHOLD) { return; }
+        lastBikeCount = bikeCount;
 
         bot.startPrivateConversation({user: USER_ID}, function(err,conversation) {
-          conversation.say(':bike: Only ' + bikes + ' bikes left!');
+          conversation.say(':bike: Only ' + bikeCount + ' bikes left!');
         });
       });
+  },
+  start: false,
+  timeZone: 'Europe/Amsterdam'
+});
+
+const jobReset = new CronJob({
+  cronTime: '01 00 00 * * *',
+  onTick: function() {
+    lastBikeCount = undefined;
   },
   start: false,
   timeZone: 'Europe/Amsterdam'
@@ -93,4 +111,5 @@ app.get('/oauth', function(req, res) {
   }
 });
 
-job.start();
+jobInit.start();
+jobReset.start();
